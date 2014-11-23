@@ -5,7 +5,6 @@ import com.training.model.api.VNetwork;
 import com.training.model.api.VStorage;
 import org.eclipse.persistence.annotations.Convert;
 import org.eclipse.persistence.annotations.TypeConverter;
-import org.postgresql.util.PGobject;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -23,7 +22,7 @@ import java.util.UUID;
 @NamedNativeQueries({
         @NamedNativeQuery(name = VNetworkPE.NetworkLock, query = "select * from test_network where c_uuid = ?1 for update")
 })
-public class VNetworkPE extends AbstractIdentity implements VNetwork{
+public class VNetworkPE extends AbstractIdentity implements VNetwork<VMetadataImpl>{
 
     public static final String NetworkLock = "NetworkLock";
     public static final String NetworkNamedLock = "NetworkNamedLock";
@@ -37,6 +36,9 @@ public class VNetworkPE extends AbstractIdentity implements VNetwork{
     @Convert("uuid")
     @Column(name = "fk_pgroupId")
     private UUID pgroupId;
+
+    @Embedded
+    private VMetadataImpl vMetadata;
 
     @Transient
    // @OneToMany(targetEntity = VStoragePE.class, cascade = CascadeType.ALL, orphanRemoval = true, fetch
@@ -68,4 +70,16 @@ public class VNetworkPE extends AbstractIdentity implements VNetwork{
     public void setLocation(Location location) {
         this.location = (VLocationPE)location;
     }
+
+    @Override
+    public VMetadataImpl getvMetadata() {
+        return vMetadata;
+    }
+
+    @Override
+    public void setvMetadata(VMetadataImpl vMetadata) {
+        this.vMetadata = vMetadata;
+    }
+
+
 }

@@ -4,6 +4,7 @@ import com.training.api.TrainingAccess;
 import com.training.dao.PbTrainingDAO;
 import com.training.model.api.VNetwork;
 import com.training.model.api.VirtualState;
+import com.training.model.dto.VNetworkDTO;
 import com.training.model.entity.PGroupPE;
 import com.training.model.entity.VLocationPE;
 import com.training.model.entity.VNetworkPE;
@@ -12,6 +13,7 @@ import javax.ejb.*;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.io.Serializable;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -57,11 +59,16 @@ public class TrainingAccessImpl implements TrainingAccess {
         return clusterId.toString();
     }
 
+    public List<VNetworkDTO> getVNetworkMetaInfos(){
+        PbTrainingDAO dao = PbTrainingDAO.getInstance(entityManager);
+        return dao.getVNetworkMeta();
+    }
+
     public String getValue(String val){
         return val;
     }
 
-    public VNetwork getMetaInfo(String networkUuid){
+    public VNetworkDTO getMetaInfo(String networkUuid){
         return PbTrainingDAO.getInstance(entityManager).getVNetworkMeta(UUID.fromString(networkUuid));
     }
 }

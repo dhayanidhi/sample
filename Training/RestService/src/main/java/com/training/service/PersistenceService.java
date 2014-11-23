@@ -6,12 +6,14 @@ import com.training.api.LockTraining;
 import com.training.api.TrainingAccess;
 import com.training.client.JsonConverterUtil;
 import com.training.model.api.VNetwork;
+import com.training.model.dto.VNetworkDTO;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.MediaType;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -53,7 +55,15 @@ public class PersistenceService {
     @Path("/network/{param}")
     @Produces({MediaType.TEXT_PLAIN})
     public Response getNetwork(@PathParam("param")String network){
-        VNetwork vNetwork = trainingAccess.getMetaInfo(network);
+        VNetworkDTO vNetwork = trainingAccess.getMetaInfo(network);
+        return Response.ok().entity(JsonConverterUtil.getJsonNetworkMetaInfo(vNetwork)).build();
+    }
+
+    @GET
+    @Path("/network")
+    @Produces({MediaType.TEXT_PLAIN})
+    public Response getNetwork(){
+        List<VNetworkDTO> vNetwork = trainingAccess.getVNetworkMetaInfos();
         return Response.ok().entity(JsonConverterUtil.getJsonNetworkMetaInfo(vNetwork)).build();
     }
 

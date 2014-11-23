@@ -1,6 +1,9 @@
 package com.training.dao;
 
+import com.training.model.api.Location;
+import com.training.model.api.VMetadata;
 import com.training.model.api.VNetwork;
+import com.training.model.dto.VNetworkDTO;
 import com.training.model.entity.PGroupPE;
 import com.training.model.entity.VLocationPE;
 import com.training.model.entity.VNetworkPE;
@@ -9,9 +12,10 @@ import javax.persistence.EntityManager;
 import javax.persistence.LockModeType;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
+import javax.persistence.criteria.*;
+import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.Metamodel;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -46,17 +50,45 @@ public class PbTrainingDAO extends AbstractDAO {
         insert(vNetworkPE);
     }
 
-    public VNetworkPE getVNetworkMeta(UUID networkId){
+    public VNetworkDTO getVNetworkMeta(UUID networkId){
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<VNetworkPE> criteriaQuery = criteriaBuilder.createQuery(VNetworkPE.class);
-        Root network = criteriaQuery.from(VNetworkPE.class);
-        network.join("location");
-        criteriaQuery.select(criteriaBuilder.construct(VNetworkPE.class, network.get("uuid"),
-                network.get("location"), network.get("pgroupId")));
-        criteriaQuery.where(criteriaBuilder.equal(network.get("uuid"), networkId));
+        CriteriaQuery<VNetworkDTO> criteriaQuery = criteriaBuilder.createQuery(VNetworkDTO.class);
+        Metamodel metamodel = entityManager.getMetamodel();
+        EntityType<VNetworkPE> entityType = metamodel.entity(VNetworkPE.class);
+        Root<VNetworkPE> root = criteriaQuery.from(entityType);
 
-        TypedQuery<VNetworkPE> query = entityManager.createQuery(criteriaQuery);
-        return query.getResultList().get(0);
+        List<Selection<?>>selections = new ArrayList<Selection<?>>();
+        selections.add(root.get("uuid"));
+        selections.add(root.get("pgroupId"));
+        selections.add(root.get("vMetadata"));
+/*        Join<VNetworkPE, VMetadata> join1 = root.join("vMetadata");
+        selections.add(join1.get("creationTime"));*/
+        Join<VNetworkPE, Location> join2 = root.join("location");
+        selections.add(join2.get("path"));
+
+        criteriaQuery.select(criteriaBuilder.construct(VNetworkDTO.class, selections.toArray(new Selection[0])));
+        criteriaQuery.where(criteriaBuilder.equal(root.get("uuid"), networkId));
+        List<VNetworkDTO> networkDTOs = entityManager.createQuery(criteriaQuery).getResultList();
+        return networkDTOs.get(0);
+    }
+
+    public List<VNetworkDTO> getVNetworkMeta(){
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<VNetworkDTO> criteriaQuery = criteriaBuilder.createQuery(VNetworkDTO.class);
+        Metamodel metamodel = entityManager.getMetamodel();
+        EntityType<VNetworkPE> entityType = metamodel.entity(VNetworkPE.class);
+        Root<VNetworkPE> root = criteriaQuery.from(entityType);
+
+        List<Selection<?>>selections = new ArrayList<Selection<?>>();
+        selections.add(root.get("uuid"));
+        selections.add(root.get("pgroupId"));
+        selections.add(root.get("vMetadata"));
+        Join<VNetworkPE, Location> join2 = root.join("location");
+        selections.add(join2.get("path"));
+
+        criteriaQuery.select(criteriaBuilder.construct(VNetworkDTO.class, selections.toArray(new Selection[0])));
+        List<VNetworkDTO> networkDTOs = entityManager.createQuery(criteriaQuery).getResultList();
+        return networkDTOs;
     }
 
     public void lockNetwork(String networkUuid){

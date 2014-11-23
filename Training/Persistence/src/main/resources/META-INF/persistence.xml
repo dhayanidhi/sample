@@ -6,6 +6,7 @@
         <jta-data-source>jdbc/training</jta-data-source>
         <class>com.training.model.entity.AbstractIdentity</class>
         <class>com.training.model.entity.PGroupPE</class>
+        <class>com.training.model.entity.VMetadataImpl</class>
         <class>com.training.model.entity.VLocationPE</class>
         <class>com.training.model.entity.VLocationPricingPE</class>
         <class>com.training.model.entity.VNetworkPE</class>
